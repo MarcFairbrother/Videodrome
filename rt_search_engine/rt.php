@@ -101,7 +101,7 @@
 		}
 		
 		//Get then Print director name
-		if(isset($result->abridged_directors) && ! $actors==null){
+		if(isset($result->abridged_directors) && ! $directors==null){
 			echo "un film réalisé par ";
 			foreach ($directors as $director){
 				$directorName = $director->name;
