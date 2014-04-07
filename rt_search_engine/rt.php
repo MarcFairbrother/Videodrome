@@ -68,19 +68,14 @@
 		$url = "http://api.rottentomatoes.com/api/public/v1.0/movies/" . $id . ".json?apikey=". $apikey;
 		$result = getJsonCurl($url);
 		
-		//Get year
-		if(isset($result->year)){
-			$year = $result->year;
-		}
-		
 		//Get title
 		if(isset($result->title)){
 			$title = $result->title;
 		}
 		
-		//Get genres
-		if(isset($result->title)){
-			$genres = $result->genres;
+		//Get year
+		if(isset($result->year)){
+			$year = $result->year;
 		}
 		
 		//Get director details
@@ -93,8 +88,17 @@
 			$actors = $result->abridged_cast;
 		}
 		
+		//Get genres
+		if(isset($result->title)){
+			$genres = $result->genres;
+		}
+		
 		//Print film details
-		echo "<p>" . $title . " (" . $year . "), ";
+		echo '<p><a href="http://api.rottentomatoes.com/api/public/v1.0/movies/' . $result->id . '.json?apikey=' . $apikey . '">' . $title;
+		
+		if(isset($result->year) && ! $year==null){
+			echo " (" . $year . "), ";
+		}
 		
 		//Get then Print director name
 		if(isset($result->abridged_directors) && ! $actors==null){
@@ -104,7 +108,7 @@
 				echo $directorName . ", ";
 			}
 		}
-		echo "<br>";
+		echo "</a><br>";
 		
 		//Get then Print actor's names
 		if(isset($result->abridged_cast) && ! $actors==null){
@@ -117,15 +121,17 @@
 		}
 		
 		//Print genres
-		echo "Genres : ";
-		foreach ($genres as $genre){
-			echo $genre . ", ";
+		if(isset($result->genres) && ! $genres==null){
+			echo "Genres : ";
+			foreach ($genres as $genre){
+				echo $genre . ", ";
+			}
 		}
 		
 		echo "</p>";
 				
 		//Button to send info to DB
-		echo '<input type="submit" value="Sélectioner ce film" />';
+		echo '<form><input type="submit" value="Sélectioner ce film" ></form>';
 		
 	}
 
