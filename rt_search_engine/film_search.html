@@ -14,16 +14,9 @@
 		
 		function chargeData(str){
 
-<<<<<<< HEAD
-		if(str.length>=3){
-			chargeData(this.value);
-
-			$.post("rtjson.php"
-=======
 			if(str.length>=3){
-				$.post("rtjson.php"
->>>>>>> adfcb591a81205dba507c1dd6ea2a8d91fb8ee26
-					, {"json":1, "filmTitle":str},
+				$.post("rtjson.php",
+					{"json":1, "filmTitle":str},
 					 function(data){
 						dtFilm=[];
 						var films = data.movies;
@@ -53,11 +46,7 @@
 </form>
 <script type="text/javascript">
 	document.getElementById("titleFilm").onkeyup = function() {
-<<<<<<< HEAD
-		chargeData(this.value);
-=======
 		chargeData(this.value);   
->>>>>>> adfcb591a81205dba507c1dd6ea2a8d91fb8ee26
 	}
 </script>
 </body>
