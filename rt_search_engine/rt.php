@@ -12,6 +12,7 @@
 
 	if(isset($_POST["filmTitle"])){
 		$query=$_POST["filmTitle"];
+		
 		//$query=$_GET["q"];
 		$apikey = 'grg2t2pmwkzc26f9xbewwns5';
 		$q = urlencode($query); // make sure to url encode an query parameters
