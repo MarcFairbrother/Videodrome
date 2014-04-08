@@ -14,6 +14,9 @@
 		
 		function chargeData(str){
 
+		if(str.length>=3){
+			chargeData(this.value);
+
 			$.post("rtjson.php"
 					, {"json":1, "filmTitle":str},
 					 function(data){
@@ -41,8 +44,7 @@
 </form>
 <script type="text/javascript">
 	document.getElementById("titleFilm").onkeyup = function() {
-		if(this.value.length>=3)
-			chargeData(this.value);   
+		chargeData(this.value);
 	}
 </script>
 </body>
