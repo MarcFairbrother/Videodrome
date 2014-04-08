@@ -74,9 +74,31 @@
 		$url = "http://api.rottentomatoes.com/api/public/v1.0/movies/" . $id . ".json?apikey=". $apikey;
 		$result = getJsonCurl($url);
 		
-		//Get title
+		//Get TITLE and send TITLE & ID to DB/film_title_table
 		if(isset($result->title)){
 			$title = $result->title;
+			
+			$connexion = mysql_connect ("localhost", "root", "");
+			$select = mysql_select_db ("videodrome", $connexion);
+			$sql = "SELECT * FROM film_title_table WHERE film_title='$title'";
+			
+			$sqlResult = mysql_query ($sql);
+			
+			if(! $sqlResult){
+				
+				$write = "INSERT INTO film_title_table (film_title, rotten_tomatoes_api_id) VALUES ('$title', '$id')";
+				
+				mysql_query ($write);
+				
+				mysql_close ($connexion);
+			
+			}
+			else{
+			
+				mysql_close ($connexion);
+			
+			}
+			
 		}
 		
 		//Get year
@@ -137,7 +159,7 @@
 		echo "</p>";
 				
 		//Button to send info to DB
-		echo '<form><input type="submit" value="Sélectioner ce film" ></form>';
+		//echo '<form><input type="submit" value="Sélectioner ce film" ></form>';
 		
 	}
 
