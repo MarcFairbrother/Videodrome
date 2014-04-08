@@ -1,10 +1,3 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="UTF-8" />
-<title></title>
-</head>
-<body>
 <?php
 	if (!function_exists('curl_init')){
 		die('CURL is not installed!');
@@ -22,7 +15,8 @@
 		$search_results = getJsonCurl($endpoint);
 
 		if(isset($_POST["json"])){
-			echo $search_results;
+			echo json_encode($search_results);
+			exit;
 		}
 		
 		
@@ -141,5 +135,3 @@
 	}
 
 ?>
-</body>
-</html>
