@@ -80,11 +80,11 @@
 			
 			$connexion = mysql_connect ("localhost", "root", "");
 			$select = mysql_select_db ("videodrome", $connexion);
-			$sql = "SELECT * FROM film_title_table WHERE film_title='$title'";
+			$sql = "SELECT * FROM film_title_table WHERE rotten_tomatoes_api_id='$id'";
 			
 			$sqlResult = mysql_query ($sql);
 			
-			if(! $sqlResult){
+			if(! $sqlResult==$id){
 				
 				$write = "INSERT INTO film_title_table (film_title, rotten_tomatoes_api_id) VALUES ('$title', '$id')";
 				
