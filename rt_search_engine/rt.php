@@ -14,7 +14,7 @@
 		$query=$_POST["filmTitle"];
 		
 		//$query=$_GET["q"];
-		$apikey = 'grg2t2pmwkzc26f9xbewwns5';
+		$apikey = '';
 		$q = urlencode($query); // make sure to url encode an query parameters
 		
 		// construct the query with our apikey and the query we want to make
@@ -78,7 +78,7 @@
 		if(isset($result->title)){
 			$title = $result->title;
 			
-			$connexion = mysql_connect ("localhost", "root", "");
+			$connexion = mysql_connect ();
 			$select = mysql_select_db ("videodrome", $connexion);
 			$sql = "SELECT * FROM film_title_table WHERE rotten_tomatoes_api_id='$id'";
 			
