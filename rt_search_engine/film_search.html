@@ -14,7 +14,8 @@
 		
 		function chargeData(str){
 
-			$.post("rtjson.php"
+			if(str.length>=3){
+				$.post("rtjson.php"
 					, {"json":1, "filmTitle":str},
 					 function(data){
 						dtFilm=[];
@@ -26,6 +27,10 @@
 					   $('#titleFilm').smartAutoComplete({source: dtFilm});
 						
 					 }, "json");			
+			}else{
+				   $('#titleFilm').smartAutoComplete({source: []});
+			}
+					
 			
 		}				
 		</script>
@@ -41,8 +46,7 @@
 </form>
 <script type="text/javascript">
 	document.getElementById("titleFilm").onkeyup = function() {
-		if(this.value.length>=3)
-			chargeData(this.value);   
+		chargeData(this.value);   
 	}
 </script>
 </body>
