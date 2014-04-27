@@ -83,18 +83,17 @@
 			$sql = "SELECT * FROM film_title_table WHERE rotten_tomatoes_api_id='$id'";
 			
 			$sqlResult = mysql_query ($sql);
+
+			if ($tab_line = mysql_fetch_row($sqlResult)){
 			
-			if(! $sqlResult==$id){
-				
-				$write = "INSERT INTO film_title_table (film_title, rotten_tomatoes_api_id) VALUES ('$title', '$id')";
-				
-				mysql_query ($write);
-				
 				mysql_close ($connexion);
 			
 			}
-			else{
 			
+			else{			
+				
+				$write = "INSERT INTO film_title_table (film_title, rotten_tomatoes_api_id) VALUES ('$title', '$id')";
+				mysql_query ($write);
 				mysql_close ($connexion);
 			
 			}
