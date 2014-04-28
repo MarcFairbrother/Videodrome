@@ -6,6 +6,10 @@
 </head>
 <body>
 <?php
+	
+	//Connect to DB
+	include 'db_connection.php';
+	
 	if (!function_exists('curl_init')){
 		die('CURL is not installed!');
 	}
@@ -18,7 +22,7 @@
 		$q = urlencode($query); // make sure to url encode an query parameters
 		
 		// construct the query with our apikey and the query we want to make
-		$endpoint = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=' . $apikey . '&q=' . $q;
+		$endpoint = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=' . $apikey . '&q=' . $q . '&page_limit=5';
 		
 		$search_results = getJsonCurl($endpoint);
 
@@ -26,18 +30,21 @@
 			echo $search_results;
 		}
 		
-		
 		// play with the data!
 		$movies = $search_results->movies;
+		
 		echo '<ul>';
+		
 		foreach ($movies as $movie) {
+		
 			echo '<li>';
 			//<a href="http://api.rottentomatoes.com/api/public/v1.0/movies/' . $movie->id . '.json?apikey=' . $apikey . '">' . $movie->title . " (" . $movie->year . ")</a><br>";
 			$details = getDetailMovie($movie->id);
 			echo '</li>';
-		}
-		echo '</ul>';
 		
+		}
+		
+		echo '</ul>';
 		
 	}
 
@@ -74,50 +81,93 @@
 		$url = "http://api.rottentomatoes.com/api/public/v1.0/movies/" . $id . ".json?apikey=". $apikey;
 		$result = getJsonCurl($url);
 		
-		//Get TITLE and send TITLE & ID to DB/film_title_table
+		//Get TITLE
 		if(isset($result->title)){
 			$title = $result->title;
-			
-			$connexion = mysql_connect ();
-			$select = mysql_select_db ("videodrome", $connexion);
-			$sql = "SELECT * FROM film_title_table WHERE rotten_tomatoes_api_id='$id'";
-			
-			$sqlResult = mysql_query ($sql);
-
-			if ($tab_line = mysql_fetch_row($sqlResult)){
-			
-				mysql_close ($connexion);
-			
-			}
-			
-			else{			
-				
-				$write = "INSERT INTO film_title_table (film_title, rotten_tomatoes_api_id) VALUES ('$title', '$id')";
-				mysql_query ($write);
-				mysql_close ($connexion);
-			
-			}
-			
 		}
 		
-		//Get year
+		//Get YEAR
 		if(isset($result->year)){
 			$year = $result->year;
 		}
+
+		//Send TITLE and YEAR to DB
 		
-		//Get director details
+		$sql = "SELECT * FROM film_title_table WHERE rotten_tomatoes_api_id='$id'";
+			
+		$sqlResult = mysql_query ($sql);
+		
+		if (! $tab_line = mysql_fetch_row($sqlResult)){
+							
+			$writeFilmTitle = "INSERT INTO film_title_table (film_title, release_year, rotten_tomatoes_api_id) VALUES ('$title', '$year', '$id')";
+			mysql_query ($writeFilmTitle);
+			
+			$newDoc = "INSERT INTO doc (doc_title, doc_usage) VALUES ('$title', '1')";
+			mysql_query ($newDoc);
+			
+		}
+		
+		//Get DIRECTOR NAME and send to DB
 		if(isset($result->abridged_directors)){
 			$directors = $result->abridged_directors;
+			
+			foreach ($directors as $director){
+				$directorName = $director->name;
+		
+				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$directorName'";
+			
+				$sqlResult = mysql_query ($sql);
+		
+				if (! $tab_line = mysql_fetch_row($sqlResult)){
+								
+					$writeDirector = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$directorName', '1')";
+					mysql_query ($writeDirector);
+				
+				}
+			
+			}
+		
 		}
 		
-		//Get cast details
+		//Get CAST NAMES and send to DB
 		if(isset($result->abridged_cast)){
 			$actors = $result->abridged_cast;
+			
+			foreach ($actors as $actor){
+				$actorName = $actor->name;
+		
+				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$actorName'";
+			
+				$sqlResult = mysql_query ($sql);
+		
+				if (! $tab_line = mysql_fetch_row($sqlResult)){
+								
+					$writeActor = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$actorName', '3')";
+					mysql_query ($writeActor);
+				
+				}
+			
+			}
 		}
 		
-		//Get genres
-		if(isset($result->title)){
+		//Get GENRES and send to DB
+		if(isset($result->genres)){
 			$genres = $result->genres;
+			
+			foreach ($genres as $genre){
+		
+				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$genre'";
+			
+				$sqlResult = mysql_query ($sql);
+		
+				if (! $tab_line = mysql_fetch_row($sqlResult)){
+								
+					$writeGenre = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$genre', '4')";
+					mysql_query ($writeGenre);
+				
+				}
+			
+			}
 		}
 		
 		//Print film details
@@ -156,11 +206,10 @@
 		}
 		
 		echo "</p>";
-				
-		//Button to send info to DB
-		//echo '<form><input type="submit" value="Sélectioner ce film" ></form>';
 		
 	}
+
+	mysql_close ($connexion);
 
 ?>
 </body>
