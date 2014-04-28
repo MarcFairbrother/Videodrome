@@ -85,25 +85,24 @@
 		if(isset($result->title)){
 			$title = $result->title;
 		}
-		
-		//Get YEAR
-		if(isset($result->year)){
-			$year = $result->year;
-		}
 
 		//Send TITLE and YEAR to DB
+		if(isset($result->year)){
+			$year = $result->year;
 		
-		$sql = "SELECT * FROM film_title_table WHERE rotten_tomatoes_api_id='$id'";
+			$sql = "SELECT * FROM film_title_table WHERE rotten_tomatoes_api_id='$id'";
+				
+			$sqlResult = mysql_query ($sql);
 			
-		$sqlResult = mysql_query ($sql);
-		
-		if (! $tab_line = mysql_fetch_row($sqlResult)){
-							
-			$writeFilmTitle = "INSERT INTO film_title_table (film_title, release_year, rotten_tomatoes_api_id) VALUES ('$title', '$year', '$id')";
-			mysql_query ($writeFilmTitle);
+			if (! $tab_line = mysql_fetch_row($sqlResult)){
+								
+				$writeFilmTitle = "INSERT INTO film_title_table (film_title, release_year, rotten_tomatoes_api_id) VALUES ('$title', '$year', '$id')";
+				mysql_query ($writeFilmTitle);
+				
+				$newDoc = "INSERT INTO doc (doc_title, doc_usage) VALUES ('$title', '1')";
+				mysql_query ($newDoc);
 			
-			$newDoc = "INSERT INTO doc (doc_title, doc_usage) VALUES ('$title', '1')";
-			mysql_query ($newDoc);
+			}
 			
 		}
 		
