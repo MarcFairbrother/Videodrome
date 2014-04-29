@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <title>Recherche de Films</title>
+		<!-- AUTOCOMPLETE FOR SEARCH ENGINE: DEACTIVATED
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jquery.smart_autocomplete.js"></script>
 		<script type="text/javascript">
@@ -38,16 +39,22 @@
 		ul.smart_autocomplete_container li {list-style: none; cursor: pointer; margin: 10px 0; padding: 5px; background-color: #E3EBBC; }
     	li.smart_autocomplete_highlight {background-color: #C1CE84;}
 		</style>
+		-->
 </head>
 <body >
 <form action="rt.php" method="post">
+<!-- AUTOCOMPLETE FOR SEARCH ENGINE: DEACTIVATED
 <input type="text" keyup="chargeData()" id="titleFilm" size="50" value="" name="filmTitle" autocomplete="off">
+-->
+<input type="text" id="titleFilm" size="50" value="" name="filmTitle" autocomplete="off">
 <input type="submit" value="Search for film" >
 </form>
+<!-- AUTOCOMPLETE FOR SEARCH ENGINE: DEACTIVATED
 <script type="text/javascript">
 	document.getElementById("titleFilm").onkeyup = function() {
 		chargeData(this.value);   
 	}
 </script>
+-->
 </body>
 </html>

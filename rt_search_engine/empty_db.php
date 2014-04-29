@@ -8,6 +8,14 @@
 	mysql_query ($query);
 	$query = "TRUNCATE TABLE meta_tag";
 	mysql_query ($query);
+	$query = "TRUNCATE TABLE cast";
+	mysql_query ($query);
+	$query = "TRUNCATE TABLE cast_to_film_title";
+	mysql_query ($query);
+	$query = "TRUNCATE TABLE genres";
+	mysql_query ($query);
+	$query = "TRUNCATE TABLE genres_to_film_title";
+	mysql_query ($query);
 	mysql_close ($connexion);
 	header("Location: film_search.html");
 	exit;

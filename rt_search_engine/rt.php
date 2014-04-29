@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title></title>
+<title>Moteur de recherche par titre de film</title>
 </head>
 <body>
 <?php
@@ -19,17 +19,17 @@
 		
 		//$query=$_GET["q"];
 		$apikey = '';
-		$q = urlencode($query); // make sure to url encode an query parameters
-		
+		$q = urlencode($query); // make sure to url encode query parameters
+
 		// construct the query with our apikey and the query we want to make
 		$endpoint = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=' . $apikey . '&q=' . $q . '&page_limit=5';
-		
+
 		$search_results = getJsonCurl($endpoint);
 
 		if(isset($_POST["json"])){
 			echo $search_results;
 		}
-		
+
 		// play with the data!
 		$movies = $search_results->movies;
 		
@@ -116,27 +116,27 @@
 				$directorName = $director->name;
 				$directorNameEscaped =  mysql_real_escape_string($directorName);
 		
-				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$directorNameEscaped' AND meta_tag_type='1'";
+				$sql = "SELECT * FROM cast WHERE cast_name='$directorNameEscaped' AND cast_status='director'";
 			
 				$sqlResult = mysql_query ($sql);
 		
 				if (! $tab_line = mysql_fetch_row($sqlResult)){
 								
-					$writeDirector = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$directorNameEscaped', '1')";
+					$writeDirector = "INSERT INTO cast (cast_name, cast_status) VALUES ('$directorNameEscaped', 'director')";
 					mysql_query ($writeDirector);
 					$DirectorID = mysql_insert_id();
 					
-					$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$DirectorID', '$newDocID')";
+					$addRelation = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$DirectorID', '$FilmTitleID')";
 					mysql_query ($addRelation);
 				
 				}
 				else{
 				
-					$fetchDirectorID = "SELECT * FROM meta_tag WHERE meta_tag_title='$directorNameEscaped' AND meta_tag_type='1'";
+					$fetchDirectorID = "SELECT * FROM cast WHERE cast_name='$directorNameEscaped' AND cast_status='director'";
 					$DirectorResult = mysql_query ($fetchDirectorID);
 					while ($tab_line = mysql_fetch_row($DirectorResult)){
 						$DirectorID = $tab_line[0];
-						$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$DirectorID', '$newDocID')";
+						$addRelation = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$DirectorID', '$FilmTitleID')";
 						mysql_query ($addRelation);
 					}
 					
@@ -154,27 +154,27 @@
 				$actorName = $actor->name;
 				$actorNameEscaped =  mysql_real_escape_string($actorName);
 		
-				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$actorNameEscaped' AND meta_tag_type='3'";
+				$sql = "SELECT * FROM cast WHERE cast_name='$actorNameEscaped' AND cast_status='actor'";
 			
 				$sqlResult = mysql_query ($sql);
 		
 				if (! $tab_line = mysql_fetch_row($sqlResult)){
 								
-					$writeActor = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$actorNameEscaped', '3')";
+					$writeActor = "INSERT INTO cast (cast_name, cast_status) VALUES ('$actorNameEscaped', 'actor')";
 					mysql_query ($writeActor);
 					$ActorID = mysql_insert_id();
 					
-					$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$ActorID', '$newDocID')";
+					$addRelation = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$ActorID', '$FilmTitleID')";
 					mysql_query ($addRelation);
 				
 				}
 				else{
 				
-					$fetchActorID = "SELECT * FROM meta_tag WHERE meta_tag_title='$actorNameEscaped' AND meta_tag_type='3'";
+					$fetchActorID = "SELECT * FROM cast WHERE cast_name='$actorNameEscaped' AND cast_status='actor'";
 					$ActorResult = mysql_query ($fetchActorID);
 					while ($tab_line = mysql_fetch_row($ActorResult)){
 						$ActorID = $tab_line[0];
-						$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$ActorID', '$newDocID')";
+						$addRelation = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$ActorID', '$FilmTitleID')";
 						mysql_query ($addRelation);
 					}
 					
@@ -190,29 +190,34 @@
 			foreach ($genres as $genre){
 				$genreEscaped =  mysql_real_escape_string($genre);
 				
-				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$genreEscaped'";
+				$sql = "SELECT * FROM genres WHERE genre_name='$genreEscaped'";
 			
 				$sqlResult = mysql_query ($sql);
 		
 				if (! $tab_line = mysql_fetch_row($sqlResult)){
 								
-					$writeGenre = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$genreEscaped', '4')";
+					$writeGenre = "INSERT INTO genres (genre_name) VALUES ('$genreEscaped')";
 					mysql_query ($writeGenre);
+					$GenreID = mysql_insert_id();
+					
+					$addRelation = "INSERT INTO genres_to_film_title (genre_id, film_title_id) VALUES ('$GenreID', '$FilmTitleID')";
+					mysql_query ($addRelation);
 				
 				}
 				else{
 				
-					$fetchGenreID = "SELECT * FROM meta_tag WHERE meta_tag_title='$genreEscaped'";
+					$fetchGenreID = "SELECT * FROM genres WHERE genre_name='$genreEscaped'";
 					$GenreResult = mysql_query ($fetchGenreID);
 					while ($tab_line = mysql_fetch_row($GenreResult)){
 						$GenreID = $tab_line[0];
-						$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$GenreID', '$newDocID')";
+						$addRelation = "INSERT INTO genres_to_film_title (genre_id, film_title_id) VALUES ('$GenreID', '$FilmTitleID')";
 						mysql_query ($addRelation);
 					}
 				
 				}
 				
 			}
+		
 		}
 		
 		//Print film details
@@ -223,7 +228,7 @@
 		}
 		
 		//Get then Print director name
-		if(isset($result->abridged_directors) && ! $directors==null){
+		if(isset($directors) && ! $directors==null){
 			echo "un film réalisé par ";
 			foreach ($directors as $director){
 				$directorName = $director->name;
@@ -233,7 +238,7 @@
 		echo "</a><br>";
 		
 		//Get then Print actor's names
-		if(isset($result->abridged_cast) && ! $actors==null){
+		if(isset($actors) && ! $actors==null){
 			echo "Avec : ";
 			foreach ($actors as $actor){
 				$actorName = $actor->name;
@@ -243,7 +248,7 @@
 		}
 		
 		//Print genres
-		if(isset($result->genres) && ! $genres==null){
+		if(isset($genres) && ! $genres==null){
 			echo "Genres : ";
 			foreach ($genres as $genre){
 				echo $genre . ", ";
@@ -251,7 +256,7 @@
 		}
 		
 		echo "</p>";
-		
+	
 	}
 
 	mysql_close ($connexion);
