@@ -81,27 +81,29 @@
 		$url = "http://api.rottentomatoes.com/api/public/v1.0/movies/" . $id . ".json?apikey=". $apikey;
 		$result = getJsonCurl($url);
 		
-		//Get TITLE
+		//Send TITLE and YEAR to DB
 		if(isset($result->title)){
 			$title = $result->title;
-		}
+			$titleEscaped =  mysql_real_escape_string($title);
 
-		//Send TITLE and YEAR to DB
-		if(isset($result->year)){
-			$year = $result->year;
-		
+			if(isset($result->year)){
+				$year = $result->year;
+			}
+			
 			$sql = "SELECT * FROM film_title_table WHERE rotten_tomatoes_api_id='$id'";
-				
+					
 			$sqlResult = mysql_query ($sql);
 			
 			if (! $tab_line = mysql_fetch_row($sqlResult)){
-								
-				$writeFilmTitle = "INSERT INTO film_title_table (film_title, release_year, rotten_tomatoes_api_id) VALUES ('$title', '$year', '$id')";
-				mysql_query ($writeFilmTitle);
 				
-				$newDoc = "INSERT INTO doc (doc_title, doc_usage) VALUES ('$title', '1')";
+				$writeFilmTitle = "INSERT INTO film_title_table (film_title, release_year, rotten_tomatoes_api_id) VALUES ('$titleEscaped', '$year', '$id')";
+				mysql_query ($writeFilmTitle);
+				$FilmTitleID = mysql_insert_id();
+				
+				$newDoc = "INSERT INTO doc (doc_title, doc_usage, film_title_id) VALUES ('$titleEscaped', '1', '$FilmTitleID')";
 				mysql_query ($newDoc);
-			
+				$newDocID = mysql_insert_id();		
+				
 			}
 			
 		}
@@ -112,16 +114,32 @@
 			
 			foreach ($directors as $director){
 				$directorName = $director->name;
+				$directorNameEscaped =  mysql_real_escape_string($directorName);
 		
-				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$directorName'";
+				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$directorNameEscaped' AND meta_tag_type='1'";
 			
 				$sqlResult = mysql_query ($sql);
 		
 				if (! $tab_line = mysql_fetch_row($sqlResult)){
 								
-					$writeDirector = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$directorName', '1')";
+					$writeDirector = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$directorNameEscaped', '1')";
 					mysql_query ($writeDirector);
+					$DirectorID = mysql_insert_id();
+					
+					$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$DirectorID', '$newDocID')";
+					mysql_query ($addRelation);
 				
+				}
+				else{
+				
+					$fetchDirectorID = "SELECT * FROM meta_tag WHERE meta_tag_title='$directorNameEscaped' AND meta_tag_type='1'";
+					$DirectorResult = mysql_query ($fetchDirectorID);
+					while ($tab_line = mysql_fetch_row($DirectorResult)){
+						$DirectorID = $tab_line[0];
+						$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$DirectorID', '$newDocID')";
+						mysql_query ($addRelation);
+					}
+					
 				}
 			
 			}
@@ -134,16 +152,32 @@
 			
 			foreach ($actors as $actor){
 				$actorName = $actor->name;
+				$actorNameEscaped =  mysql_real_escape_string($actorName);
 		
-				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$actorName'";
+				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$actorNameEscaped' AND meta_tag_type='3'";
 			
 				$sqlResult = mysql_query ($sql);
 		
 				if (! $tab_line = mysql_fetch_row($sqlResult)){
 								
-					$writeActor = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$actorName', '3')";
+					$writeActor = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$actorNameEscaped', '3')";
 					mysql_query ($writeActor);
+					$ActorID = mysql_insert_id();
+					
+					$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$ActorID', '$newDocID')";
+					mysql_query ($addRelation);
 				
+				}
+				else{
+				
+					$fetchActorID = "SELECT * FROM meta_tag WHERE meta_tag_title='$actorNameEscaped' AND meta_tag_type='3'";
+					$ActorResult = mysql_query ($fetchActorID);
+					while ($tab_line = mysql_fetch_row($ActorResult)){
+						$ActorID = $tab_line[0];
+						$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$ActorID', '$newDocID')";
+						mysql_query ($addRelation);
+					}
+					
 				}
 			
 			}
@@ -154,18 +188,30 @@
 			$genres = $result->genres;
 			
 			foreach ($genres as $genre){
-		
-				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$genre'";
+				$genreEscaped =  mysql_real_escape_string($genre);
+				
+				$sql = "SELECT * FROM meta_tag WHERE meta_tag_title='$genreEscaped'";
 			
 				$sqlResult = mysql_query ($sql);
 		
 				if (! $tab_line = mysql_fetch_row($sqlResult)){
 								
-					$writeGenre = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$genre', '4')";
+					$writeGenre = "INSERT INTO meta_tag (meta_tag_title, meta_tag_type) VALUES ('$genreEscaped', '4')";
 					mysql_query ($writeGenre);
 				
 				}
-			
+				else{
+				
+					$fetchGenreID = "SELECT * FROM meta_tag WHERE meta_tag_title='$genreEscaped'";
+					$GenreResult = mysql_query ($fetchGenreID);
+					while ($tab_line = mysql_fetch_row($GenreResult)){
+						$GenreID = $tab_line[0];
+						$addRelation = "INSERT INTO meta_tag_to_doc (meta_tag_id, doc_id) VALUES ('$GenreID', '$newDocID')";
+						mysql_query ($addRelation);
+					}
+				
+				}
+				
 			}
 		}
 		
@@ -211,5 +257,10 @@
 	mysql_close ($connexion);
 
 ?>
+<p><a href="film_search.html">Lancer une autre recherche</a></p>
+<!-- FOR DVPT PURPOSE ONLY : RESETS ALL TABLES OF DATABASE TO ZERO -->
+<form action="empty_db.php">
+<input type="submit" value="Vider la base de données" >
+</form>
 </body>
 </html>
