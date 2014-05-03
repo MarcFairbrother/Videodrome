@@ -17,34 +17,59 @@
 	if(isset($_POST["filmTitle"])){
 		$query=$_POST["filmTitle"];
 		
-		//$query=$_GET["q"];
-		$apikey = '';
-		$q = urlencode($query); // make sure to url encode query parameters
-
-		// construct the query with our apikey and the query we want to make
-		$endpoint = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=' . $apikey . '&q=' . $q . '&page_limit=5';
-
-		$search_results = getJsonCurl($endpoint);
-
-		if(isset($_POST["json"])){
-			echo $search_results;
-		}
-
-		// play with the data!
-		$movies = $search_results->movies;
+		//Search for up to five results in DB
 		
-		echo '<ul>';
+		$sql = "SELECT film_title, release_year, rotten_tomatoes_api_id FROM film_title_table WHERE UPPER(film_title) LIKE UPPER('%$query%')";
 		
-		foreach ($movies as $movie) {
+		$dbSearchResults = mysql_query($sql);
 		
-			echo '<li>';
-			//<a href="http://api.rottentomatoes.com/api/public/v1.0/movies/' . $movie->id . '.json?apikey=' . $apikey . '">' . $movie->title . " (" . $movie->year . ")</a><br>";
-			$details = getDetailMovie($movie->id);
-			echo '</li>';
+		$i=0;
+		
+		while (($row = mysql_fetch_row($dbSearchResults)) && ($i < 5)){
+			
+			$i++;
+			
+			echo  "<p>" . $i . $row[0] . "</p>";
 		
 		}
 		
-		echo '</ul>';
+		//Search Rotten Tomatoes API for extra results up to total of five
+		if($i<5){
+			
+			//EXCLUDE DB RESULTS FROM API RESULTS
+		
+			$rtExtras = 5 - $i;
+		
+			//$query=$_GET["q"];
+			$apikey = '';
+			$q = urlencode($query); // make sure to url encode query parameters
+
+			// construct the query with our apikey and the query we want to make
+			$endpoint = 'http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=' . $apikey . '&q=' . $q . '&page_limit=' . $rtExtras;
+
+			$search_results = getJsonCurl($endpoint);
+
+			if(isset($_POST["json"])){
+				echo $search_results;
+			}
+
+			// play with the data!
+			$movies = $search_results->movies;
+			
+			echo '<ul>';
+			
+			foreach ($movies as $movie) {
+			
+				echo '<li>';
+				//<a href="http://api.rottentomatoes.com/api/public/v1.0/movies/' . $movie->id . '.json?apikey=' . $apikey . '">' . $movie->title . " (" . $movie->year . ")</a><br>";
+				$details = getDetailMovie($movie->id);
+				echo '</li>';
+			
+			}
+			
+			echo '</ul>';
+		
+		}
 		
 	}
 
