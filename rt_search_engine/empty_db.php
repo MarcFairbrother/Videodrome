@@ -4,7 +4,7 @@
 	mysql_query ($query);
 	$query = "TRUNCATE TABLE doc";
 	mysql_query ($query);
-	$query = "TRUNCATE TABLE film_title_table";
+	$query = "TRUNCATE TABLE films";
 	mysql_query ($query);
 	$query = "TRUNCATE TABLE meta_tag";
 	mysql_query ($query);

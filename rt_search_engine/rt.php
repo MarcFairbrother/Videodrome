@@ -21,7 +21,7 @@
 		
 		//Search for up to five results in DB
 		
-		$sql = "SELECT film_title, release_year, rotten_tomatoes_api_id FROM films WHERE UPPER(data) LIKE UPPER('%$query%')";
+		$sql = "SELECT film_title, release_year, rotten_tomatoes_api_id, film_title_id FROM films WHERE UPPER(data) LIKE UPPER('%$query%')";
 		
 		$sqlResult = mysql_query($sql);
 		
@@ -36,7 +36,7 @@
 			
 			$i++;
 			
-			echo  "<li>" . $i . "/" . $row[0] . " : " . $row[2] . "</li>";
+			echo  '<li>' . $i . '/' . '<a href="film_page.php?film=' . $row[3] . '">' . $row[0] . ' (' . $row[1] . ')</a></li>';
 			
 			$arrResult[$row[2]]=$row[0];
 			
@@ -254,7 +254,7 @@
 		}
 		
 		//Print film details
-		echo '<a href="http://api.rottentomatoes.com/api/public/v1.0/movies/' . $result->id . '.json?apikey=' . $apikey . '">' . $title;
+		echo '<a href="film_page.php?film=' . $FilmTitleID . '">' . $title;
 		
 		if(isset($result->year) && ! $year==null){
 			echo " (" . $year . "), ";
