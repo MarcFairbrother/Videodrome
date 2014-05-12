@@ -21,9 +21,9 @@
 		
 		//Search for up to five results in DB
 		
-		$sql = "SELECT film_title, release_year, rotten_tomatoes_api_id FROM film_title_table WHERE UPPER(film_title) LIKE UPPER('%$query%')";
+		$sql = "SELECT film_title, release_year, rotten_tomatoes_api_id FROM films WHERE UPPER(data) LIKE UPPER('%$query%')";
 		
-		$dbSearchResults = mysql_query($sql);
+		$sqlResult = mysql_query($sql);
 		
 		$i=0;
 		
@@ -32,7 +32,7 @@
 			"bar" => "foo",
 		];
 		
-		while (($row = mysql_fetch_row($dbSearchResults)) && ($i < 5)){
+		while (($row = mysql_fetch_row($sqlResult)) && ($i < 5)){
 			
 			$i++;
 			
@@ -59,7 +59,6 @@
 			foreach ($movies as $movie){
 				
 				//EXCLUDE DB RESULTS FROM API RESULTS
-				//Problem undefined/uninitialized string offset because array is null
 				
 				if(!array_key_exists($movie->id, $arrResult) && $i < 5){
 				
@@ -112,7 +111,7 @@
 		$url = "http://api.rottentomatoes.com/api/public/v1.0/movies/" . $id . ".json?apikey=". $apikey;
 		$result = getJsonCurl($url);
 		
-		//Send TITLE and YEAR to DB
+		//Send TITLE, YEAR and JSON to DB
 		if(isset($result->title)){
 			$title = $result->title;
 			$titleEscaped =  mysql_real_escape_string($title);
@@ -121,18 +120,21 @@
 				$year = $result->year;
 			}
 			
-			$sql = "SELECT * FROM film_title_table WHERE rotten_tomatoes_api_id='$id'";
-					
+			$sql = "SELECT * FROM films WHERE rotten_tomatoes_api_id='$id'";
+			
 			$sqlResult = mysql_query ($sql);
 			
 			if (! $tab_line = mysql_fetch_row($sqlResult)){
+			
+				$RTdata = json_encode($result);
+				$RTdataEscaped = mysql_real_escape_string($RTdata);
 				
-				$writeFilmTitle = "INSERT INTO film_title_table (film_title, release_year, rotten_tomatoes_api_id) VALUES ('$titleEscaped', '$year', '$id')";
-				mysql_query ($writeFilmTitle);
+				$sql = "INSERT INTO films (film_title, release_year, rotten_tomatoes_api_id, data) VALUES ('$titleEscaped', '$year', '$id', '$RTdataEscaped')";
+				mysql_query ($sql);
 				$FilmTitleID = mysql_insert_id();
 				
-				$newDoc = "INSERT INTO doc (doc_title, doc_usage, film_title_id) VALUES ('$titleEscaped', '1', '$FilmTitleID')";
-				mysql_query ($newDoc);
+				$sql = "INSERT INTO doc (doc_title, doc_usage, film_title_id) VALUES ('$titleEscaped', '1', '$FilmTitleID')";
+				mysql_query ($sql);
 				$newDocID = mysql_insert_id();		
 				
 			}
@@ -153,12 +155,12 @@
 		
 				if (! $tab_line = mysql_fetch_row($sqlResult)){
 								
-					$writeDirector = "INSERT INTO cast (cast_name, cast_status) VALUES ('$directorNameEscaped', 'director')";
-					mysql_query ($writeDirector);
+					$sql = "INSERT INTO cast (cast_name, cast_status) VALUES ('$directorNameEscaped', 'director')";
+					mysql_query ($sql);
 					$DirectorID = mysql_insert_id();
 					
-					$addRelation = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$DirectorID', '$FilmTitleID')";
-					mysql_query ($addRelation);
+					$sql = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$DirectorID', '$FilmTitleID')";
+					mysql_query ($sql);
 				
 				}
 				else{
@@ -167,8 +169,8 @@
 					$DirectorResult = mysql_query ($fetchDirectorID);
 					while ($tab_line = mysql_fetch_row($DirectorResult)){
 						$DirectorID = $tab_line[0];
-						$addRelation = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$DirectorID', '$FilmTitleID')";
-						mysql_query ($addRelation);
+						$sql = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$DirectorID', '$FilmTitleID')";
+						mysql_query ($sql);
 					}
 					
 				}
@@ -191,22 +193,22 @@
 		
 				if (! $tab_line = mysql_fetch_row($sqlResult)){
 								
-					$writeActor = "INSERT INTO cast (cast_name, cast_status) VALUES ('$actorNameEscaped', 'actor')";
-					mysql_query ($writeActor);
+					$sql = "INSERT INTO cast (cast_name, cast_status) VALUES ('$actorNameEscaped', 'actor')";
+					mysql_query ($sql);
 					$ActorID = mysql_insert_id();
 					
-					$addRelation = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$ActorID', '$FilmTitleID')";
-					mysql_query ($addRelation);
+					$sql = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$ActorID', '$FilmTitleID')";
+					mysql_query ($sql);
 				
 				}
 				else{
 				
-					$fetchActorID = "SELECT * FROM cast WHERE cast_name='$actorNameEscaped' AND cast_status='actor'";
-					$ActorResult = mysql_query ($fetchActorID);
+					$sql = "SELECT * FROM cast WHERE cast_name='$actorNameEscaped' AND cast_status='actor'";
+					$ActorResult = mysql_query ($sql);
 					while ($tab_line = mysql_fetch_row($ActorResult)){
 						$ActorID = $tab_line[0];
-						$addRelation = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$ActorID', '$FilmTitleID')";
-						mysql_query ($addRelation);
+						$sql = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$ActorID', '$FilmTitleID')";
+						mysql_query ($sql);
 					}
 					
 				}
@@ -227,22 +229,22 @@
 		
 				if (! $tab_line = mysql_fetch_row($sqlResult)){
 								
-					$writeGenre = "INSERT INTO genres (genre_name) VALUES ('$genreEscaped')";
-					mysql_query ($writeGenre);
+					$sql = "INSERT INTO genres (genre_name) VALUES ('$genreEscaped')";
+					mysql_query ($sql);
 					$GenreID = mysql_insert_id();
 					
-					$addRelation = "INSERT INTO genres_to_film_title (genre_id, film_title_id) VALUES ('$GenreID', '$FilmTitleID')";
-					mysql_query ($addRelation);
+					$sql = "INSERT INTO genres_to_film_title (genre_id, film_title_id) VALUES ('$GenreID', '$FilmTitleID')";
+					mysql_query ($sql);
 				
 				}
 				else{
 				
-					$fetchGenreID = "SELECT * FROM genres WHERE genre_name='$genreEscaped'";
-					$GenreResult = mysql_query ($fetchGenreID);
-					while ($tab_line = mysql_fetch_row($GenreResult)){
+					$sql = "SELECT * FROM genres WHERE genre_name='$genreEscaped'";
+					$sqlResult = mysql_query ($sql);
+					while ($tab_line = mysql_fetch_row($sqlResult)){
 						$GenreID = $tab_line[0];
-						$addRelation = "INSERT INTO genres_to_film_title (genre_id, film_title_id) VALUES ('$GenreID', '$FilmTitleID')";
-						mysql_query ($addRelation);
+						$sql = "INSERT INTO genres_to_film_title (genre_id, film_title_id) VALUES ('$GenreID', '$FilmTitleID')";
+						mysql_query ($sql);
 					}
 				
 				}
