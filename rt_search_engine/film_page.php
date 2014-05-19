@@ -9,7 +9,7 @@
 
 	$filmID = $_GET['film'];
 
-	$sql = "SELECT film_title, release_year, data FROM films WHERE film_title_id='$filmID'";
+	$sql = "SELECT film_title, release_year, data, poster FROM films WHERE film_title_id='$filmID'";
 	$sqlResult = mysql_query($sql);
 
 	while ($row = mysql_fetch_row($sqlResult)){
@@ -17,6 +17,7 @@
 		$title = $row[0];
 		$year = $row[1];
 		$detail = $row[2];
+		$posterURL = $row[3];
 	
 	}
 	
@@ -65,7 +66,12 @@ header{
 #landing{
 	width:100%;
 	height:100vh;
+	text-align:center;
 	position:relative;
+}
+#poster{
+	margin-top:35vh;
+	border:solid 1px #000;
 }
 #cast{
 	width:100%;
@@ -115,6 +121,7 @@ header{
 		<?php echo "<h1>" . $title . " (" . $year .")</h1>"; ?>
 	</header>
 	<section id="landing">
+		<img id="poster" src="<?php echo $posterURL ?>" alt="<?php echo $title ?>"/>
 		<nav class="scroll_arrow">
 			<img src="../img/arrow_down.png" alt="Scroller" id="toCast"/>
 		</nav>
@@ -134,6 +141,11 @@ header{
 	</section>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script>
+		$("#poster").click(function() {
+			$('html, body').animate({
+				scrollTop: $("#player").offset().top
+			}, 800);
+		});
 		$("#toCast").click(function() {
 			$('html, body').animate({
 				scrollTop: $("#cast").offset().top

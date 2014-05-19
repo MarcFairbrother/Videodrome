@@ -119,6 +119,11 @@
 			if(isset($result->year)){
 				$year = $result->year;
 			}
+
+			if(isset($result->posters->profile)){
+				$posterURL = $result->posters->profile;
+				$posterEscaped = mysql_real_escape_string($posterURL);
+			}
 			
 			$sql = "SELECT * FROM films WHERE rotten_tomatoes_api_id='$id'";
 			
@@ -129,7 +134,7 @@
 				$RTdata = json_encode($result);
 				$RTdataEscaped = mysql_real_escape_string($RTdata);
 				
-				$sql = "INSERT INTO films (film_title, release_year, rotten_tomatoes_api_id, data) VALUES ('$titleEscaped', '$year', '$id', '$RTdataEscaped')";
+				$sql = "INSERT INTO films (film_title, release_year, rotten_tomatoes_api_id, data, poster) VALUES ('$titleEscaped', '$year', '$id', '$RTdataEscaped', '$posterEscaped')";
 				mysql_query ($sql);
 				$FilmTitleID = mysql_insert_id();
 				

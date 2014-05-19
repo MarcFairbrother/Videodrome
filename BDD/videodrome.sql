@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Client: 127.0.0.1
--- Généré le: Lun 12 Mai 2014 à 14:58
+-- Généré le: Lun 19 Mai 2014 à 14:50
 -- Version du serveur: 5.5.32
 -- Version de PHP: 5.4.19
 
@@ -295,6 +295,7 @@ CREATE TABLE IF NOT EXISTS `films` (
   `release_year` year(4) NOT NULL,
   `rotten_tomatoes_api_id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `data` longtext COLLATE utf8_unicode_ci NOT NULL,
+  `poster` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`film_title_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
