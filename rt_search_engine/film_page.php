@@ -103,16 +103,21 @@ header{
 }
 #player{
 	width:100%;
-	height:100vh;
+	height:55vh;
+	padding-top:45vh;
 	position:relative;
 	background-image:url('../img/player.jpg');
 	background-repeat:no-repeat;
 	background-position:center; 
 }
-#annotate{
-	border:0;
-	margin:-1px -5px;
-	background:transparent;
+#Form{
+	width:25vw;
+	margin:0 auto;
+	background:#fff;
+}
+#message{
+	color:#d51b17;
+	text-align:center;
 }
 </style>
 </head>
@@ -135,12 +140,29 @@ header{
 		</nav>
 	</section>
 	<section id="player">
+			<div id="message" style="display: none;">
+			</div>
+			<form action="" id="Form" method="post">
+                <fieldset>
+                    <legend>Lier à un autre film</legend>
+                    <p>
+                        <label for="movieSearch">Titre du film:</label>
+                        <input type="text" name="movieSearch" id="movieSearch" value="" />
+                    </p>
+                    <p>
+                        <input type="submit" name="submit" id="submit" style="float: right; clear: both; margin-right: 3px;" value="Submit" />
+                    </p>
+                </fieldset>
+            </form>
 		<nav class="scroll_arrow">
 			<img src="../img/arrow_up.png" alt="Scroller" id="toTop"/>
 		</nav>
 	</section>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script>
+	
+		//Scrolling animations
+	
 		$("#poster").click(function() {
 			$('html, body').animate({
 				scrollTop: $("#player").offset().top
@@ -161,6 +183,40 @@ header{
 				scrollTop: $("#landing").offset().top
 			}, 800);
 		});
+		
+		//Ajax
+		
+		$(document).ready(function(){
+			$('#submit').click(function() {
+
+				$('#Form').hide(0);
+				$('#message').hide(0);
+
+				$.ajax({
+					type : 'POST',
+					url : 'post.php',
+					dataType : 'json',
+					data: {
+						movieSearch : $('#movieSearch').val()
+					},
+					success : function(data){
+						$('#message').removeClass().addClass((data.error === true) ? 'error' : 'success')
+							.text(data.msg).show(500);
+						if (data.error === true)
+							$('#Form').show(500);
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						$('#message').removeClass().addClass('error')
+							.text('There was an error.').show(500);
+						$('#Form').show(500);
+					}
+				});
+
+				return false;
+				
+			});
+		});
+		
 	</script>
 </body>
 </html>
