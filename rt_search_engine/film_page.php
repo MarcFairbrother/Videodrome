@@ -140,7 +140,7 @@ header{
 		</nav>
 	</section>
 	<section id="player">
-			<div id="message" style="display: none;">
+			<div id="message" style="display:none">
 			</div>
 			<form action="" id="Form" method="post">
                 <fieldset>
@@ -199,11 +199,19 @@ header{
 					data: {
 						movieSearch : $('#movieSearch').val()
 					},
-					success : function(data){
-						$('#message').removeClass().addClass((data.error === true) ? 'error' : 'success')
-							.text(data.msg).show(500);
+					success : function (data) {
+						var items = [];
+						$(data, function (msg) {
+							$.each(msg, function (id, title) {
+									items.push("<li id='" + id + "'>" + title + "</li>");
+							});
+						});
+						var newList = $('<ul id="movieResults"/>');
+						$("#movieResults").html("<ul>" + items + "</ul>");
+						$("#message").removeClass().addClass((data.error === true) ? 'error' : 'success')
+							.append(newList).show(500);
 						if (data.error === true)
-							$('#Form').show(500);
+						$('#Form').show(500);
 					},
 					error : function(XMLHttpRequest, textStatus, errorThrown) {
 						$('#message').removeClass().addClass('error')
