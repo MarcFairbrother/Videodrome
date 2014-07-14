@@ -1,5 +1,4 @@
 <?php
-$_POST['movieSearch']="matinee";
 
 if (empty($_POST['movieSearch'])) {
 
