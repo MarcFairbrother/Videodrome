@@ -154,6 +154,8 @@ header{
                     </p>
                 </fieldset>
             </form>
+			<div id="movieResults"></div>
+            
 		<nav class="scroll_arrow">
 			<img src="../img/arrow_up.png" alt="Scroller" id="toTop"/>
 		</nav>
@@ -201,12 +203,17 @@ header{
 					},
 					success : function (data) {
 						var items = [];
+						data.msg.forEach(function(film){
+							items.push("<li id='" + film.id + "'>" + film.title + "</li>");
+						  });
+						/*						
 						$(data, function (msg) {
 							$.each(msg, function (id, title) {
 									items.push("<li id='" + id + "'>" + title + "</li>");
 							});
 						});
-						var newList = $('<ul id="movieResults"/>');
+						*/
+						var newList = $('<ul id="moviesLinks"/>');
 						$("#movieResults").html("<ul>" + items + "</ul>");
 						$("#message").removeClass().addClass((data.error === true) ? 'error' : 'success')
 							.append(newList).show(500);
