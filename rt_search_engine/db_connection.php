@@ -1,4 +1,3 @@
 <?php
-	$connexion = mysql_connect ("localhost", "root", "");
-	$select = mysql_select_db ("cdnl_videodrome", $connexion);
+	$connexion = mysqli_connect("host", "user_name", "password", "database");
 ?>

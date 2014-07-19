@@ -10,9 +10,9 @@
 	$filmID = $_GET['film'];
 
 	$sql = "SELECT film_title, release_year, data, poster FROM films WHERE film_title_id='$filmID'";
-	$sqlResult = mysql_query($sql);
+	$sqlResult = mysqli_query($connexion, $sql);
 
-	while ($row = mysql_fetch_row($sqlResult)){
+	while ($row = mysqli_fetch_row($sqlResult)){
 	
 		$title = $row[0];
 		$year = $row[1];
@@ -21,7 +21,7 @@
 	
 	}
 	
-	mysql_close ($connexion);
+	mysqli_close ($connexion);
 
 ?>
 <title><?php echo $title ?></title>

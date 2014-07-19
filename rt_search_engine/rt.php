@@ -23,7 +23,7 @@
 		
 		$sql = "SELECT film_title, release_year, rotten_tomatoes_api_id, film_title_id FROM films WHERE UPPER(data) LIKE UPPER('%$query%')";
 		
-		$sqlResult = mysql_query($sql);
+		$sqlResult = mysqli_query($connexion, $sql);
 		
 		$i=0;
 		
@@ -32,11 +32,11 @@
 			"bar" => "foo",
 		];
 		
-		while (($row = mysql_fetch_row($sqlResult)) && ($i < 5)){
+		while (($row = mysqli_fetch_row($sqlResult)) && ($i < 5)){
 			
 			$i++;
 			
-			echo  '<li>' . $i . '/' . '<a href="film_page.php?film=' . $row[3] . '">' . $row[0] . ' (' . $row[1] . ')</a></li>';
+			echo  '<li>' . $i . '/' . '<a href="film_page.php?film=' . $row[3] . '">' . $row[0] . ' (' . $row[1] . ')</a> (DB)</li>';
 			
 			$arrResult[$row[2]]=$row[0];
 			
@@ -107,6 +107,7 @@
 	function getDetailMovie($id){
 	
 		global $apikey;
+		global $connexion;
 		
 		$url = "http://api.rottentomatoes.com/api/public/v1.0/movies/" . $id . ".json?apikey=". $apikey;
 		$result = getJsonCurl($url);
@@ -114,7 +115,7 @@
 		//Send TITLE, YEAR and JSON to DB
 		if(isset($result->title)){
 			$title = $result->title;
-			$titleEscaped =  mysql_real_escape_string($title);
+			$titleEscaped = mysqli_real_escape_string($connexion, $title);
 
 			if(isset($result->year)){
 				$year = $result->year;
@@ -122,25 +123,25 @@
 
 			if(isset($result->posters->profile)){
 				$posterURL = $result->posters->profile;
-				$posterEscaped = mysql_real_escape_string($posterURL);
+				$posterEscaped = mysqli_real_escape_string($connexion, $posterURL);
 			}
 			
 			$sql = "SELECT * FROM films WHERE rotten_tomatoes_api_id='$id'";
 			
-			$sqlResult = mysql_query ($sql);
+			$sqlResult = mysqli_query($connexion, $sql);
 			
-			if (! $tab_line = mysql_fetch_row($sqlResult)){
+			if (! $tab_line = mysqli_fetch_row($sqlResult)){
 			
 				$RTdata = json_encode($result);
-				$RTdataEscaped = mysql_real_escape_string($RTdata);
+				$RTdataEscaped = mysqli_real_escape_string($connexion, $RTdata);
 				
-				$sql = "INSERT INTO films (film_title, release_year, rotten_tomatoes_api_id, data, poster) VALUES ('$titleEscaped', '$year', '$id', '$RTdataEscaped', '$posterEscaped')";
-				mysql_query ($sql);
-				$FilmTitleID = mysql_insert_id();
+				$sql = "INSERT INTO films (film_title, release_year, rotten_tomatoes_api_id, data,  poster) VALUES ('$titleEscaped', '$year', '$id', '$RTdataEscaped', '$posterEscaped')";
+				mysqli_query($connexion, $sql);
+				$FilmTitleID = mysqli_insert_id($connexion);
 				
 				$sql = "INSERT INTO doc (doc_title, doc_usage, film_title_id) VALUES ('$titleEscaped', '1', '$FilmTitleID')";
-				mysql_query ($sql);
-				$newDocID = mysql_insert_id();		
+				mysqli_query($connexion, $sql);
+				$newDocID = mysqli_insert_id($connexion);		
 				
 			}
 			
@@ -152,30 +153,30 @@
 			
 			foreach ($directors as $director){
 				$directorName = $director->name;
-				$directorNameEscaped =  mysql_real_escape_string($directorName);
+				$directorNameEscaped =  mysqli_real_escape_string($connexion, $directorName);
 		
 				$sql = "SELECT * FROM cast WHERE cast_name='$directorNameEscaped' AND cast_status='director'";
 			
-				$sqlResult = mysql_query ($sql);
+				$sqlResult = mysqli_query($connexion, $sql);
 		
-				if (! $tab_line = mysql_fetch_row($sqlResult)){
+				if (! $tab_line = mysqli_fetch_row($sqlResult)){
 								
 					$sql = "INSERT INTO cast (cast_name, cast_status) VALUES ('$directorNameEscaped', 'director')";
-					mysql_query ($sql);
-					$DirectorID = mysql_insert_id();
+					mysqli_query($connexion, $sql);
+					$DirectorID = mysqli_insert_id($connexion);
 					
 					$sql = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$DirectorID', '$FilmTitleID')";
-					mysql_query ($sql);
+					mysqli_query($connexion, $sql);
 				
 				}
 				else{
 				
 					$fetchDirectorID = "SELECT * FROM cast WHERE cast_name='$directorNameEscaped' AND cast_status='director'";
-					$DirectorResult = mysql_query ($fetchDirectorID);
-					while ($tab_line = mysql_fetch_row($DirectorResult)){
+					$DirectorResult = mysqli_query($connexion, $fetchDirectorID);
+					while ($tab_line = mysqli_fetch_row($DirectorResult)){
 						$DirectorID = $tab_line[0];
 						$sql = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$DirectorID', '$FilmTitleID')";
-						mysql_query ($sql);
+						mysqli_query($connexion, $sql);
 					}
 					
 				}
@@ -190,30 +191,30 @@
 			
 			foreach ($actors as $actor){
 				$actorName = $actor->name;
-				$actorNameEscaped =  mysql_real_escape_string($actorName);
+				$actorNameEscaped =  mysqli_real_escape_string($connexion, $actorName);
 		
 				$sql = "SELECT * FROM cast WHERE cast_name='$actorNameEscaped' AND cast_status='actor'";
 			
-				$sqlResult = mysql_query ($sql);
+				$sqlResult = mysqli_query($connexion, $sql);
 		
-				if (! $tab_line = mysql_fetch_row($sqlResult)){
+				if (! $tab_line = mysqli_fetch_row($sqlResult)){
 								
 					$sql = "INSERT INTO cast (cast_name, cast_status) VALUES ('$actorNameEscaped', 'actor')";
-					mysql_query ($sql);
-					$ActorID = mysql_insert_id();
+					mysqli_query($connexion, $sql);
+					$ActorID = mysqli_insert_id($connexion);
 					
 					$sql = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$ActorID', '$FilmTitleID')";
-					mysql_query ($sql);
+					mysqli_query($connexion, $sql);
 				
 				}
 				else{
 				
 					$sql = "SELECT * FROM cast WHERE cast_name='$actorNameEscaped' AND cast_status='actor'";
-					$ActorResult = mysql_query ($sql);
-					while ($tab_line = mysql_fetch_row($ActorResult)){
+					$ActorResult = mysqli_query($connexion, $sql);
+					while ($tab_line = mysqli_fetch_row($ActorResult)){
 						$ActorID = $tab_line[0];
 						$sql = "INSERT INTO cast_to_film_title (cast_id, film_title_id) VALUES ('$ActorID', '$FilmTitleID')";
-						mysql_query ($sql);
+						mysqli_query($connexion, $sql);
 					}
 					
 				}
@@ -226,30 +227,30 @@
 			$genres = $result->genres;
 			
 			foreach ($genres as $genre){
-				$genreEscaped =  mysql_real_escape_string($genre);
+				$genreEscaped =  mysqli_real_escape_string($connexion, $genre);
 				
 				$sql = "SELECT * FROM genres WHERE genre_name='$genreEscaped'";
 			
-				$sqlResult = mysql_query ($sql);
+				$sqlResult = mysqli_query($connexion, $sql);
 		
-				if (! $tab_line = mysql_fetch_row($sqlResult)){
+				if (! $tab_line = mysqli_fetch_row($sqlResult)){
 								
 					$sql = "INSERT INTO genres (genre_name) VALUES ('$genreEscaped')";
-					mysql_query ($sql);
-					$GenreID = mysql_insert_id();
+					mysqli_query($connexion,$sql);
+					$GenreID = mysqli_insert_id($connexion);
 					
 					$sql = "INSERT INTO genres_to_film_title (genre_id, film_title_id) VALUES ('$GenreID', '$FilmTitleID')";
-					mysql_query ($sql);
+					mysqli_query($connexion, $sql);
 				
 				}
 				else{
 				
 					$sql = "SELECT * FROM genres WHERE genre_name='$genreEscaped'";
-					$sqlResult = mysql_query ($sql);
-					while ($tab_line = mysql_fetch_row($sqlResult)){
+					$sqlResult = mysqli_query($connexion, $sql);
+					while ($tab_line = mysqli_fetch_row($sqlResult)){
 						$GenreID = $tab_line[0];
 						$sql = "INSERT INTO genres_to_film_title (genre_id, film_title_id) VALUES ('$GenreID', '$FilmTitleID')";
-						mysql_query ($sql);
+						mysqli_query($connexion, $sql);
 					}
 				
 				}
@@ -295,7 +296,7 @@
 	
 	}
 
-	mysql_close ($connexion);
+	mysqli_close ($connexion);
 
 ?>
 <p><a href="film_search.html">Lancer une autre recherche</a></p>
