@@ -119,6 +119,11 @@ header{
 	color:#d51b17;
 	text-align:center;
 }
+#movieResults{
+	width:25vw;
+	margin:0 auto;
+	background:#fff;
+}
 </style>
 </head>
 <body>
@@ -150,7 +155,7 @@ header{
                         <input type="text" name="movieSearch" id="movieSearch" value="" />
                     </p>
                     <p>
-                        <input type="submit" name="submit" id="submit" style="float: right; clear: both; margin-right: 3px;" value="Submit" />
+                        <input type="submit" name="filmSearch" id="filmSearch" style="float: right; clear: both; margin-right: 3px;" value="Chercher le film" />
                     </p>
                 </fieldset>
             </form>
@@ -189,7 +194,7 @@ header{
 		//Ajax
 		
 		$(document).ready(function(){
-			$('#submit').click(function() {
+			$('#filmSearch').click(function() {
 
 				$('#Form').hide(0);
 				$('#message').hide(0);
@@ -202,21 +207,14 @@ header{
 						movieSearch : $('#movieSearch').val()
 					},
 					success : function (data) {
-						var items = [];
+						$("#movieResults").html("<form id='moviesLinks'></form>");
+						$("#moviesLinks").append("<input name='annotationTitle' type='text' value='Choisissez un titre'><br>");
+						$("#moviesLinks").append("<input name='briefDescription' type='text' value='Description brève de l'annotation'><br>");
 						data.msg.forEach(function(film){
-							items.push("<li id='" + film.id + "'>" + film.title + "</li>");
-						  });
-						/*						
-						$(data, function (msg) {
-							$.each(msg, function (id, title) {
-									items.push("<li id='" + id + "'>" + title + "</li>");
-							});
+							$("#moviesLinks").append("<input class='movieChoices' type='radio' name='filmChoice' value='" + film.id + "'><a href='film_page.php?film=" + film.id + "'>" + film.id + ": " + film.title + "</a><br>");
 						});
-						*/
-						var newList = $('<ul id="moviesLinks"/>');
-						$("#movieResults").html("<ul>" + items + "</ul>");
-						$("#message").removeClass().addClass((data.error === true) ? 'error' : 'success')
-							.append(newList).show(500);
+						$("#moviesLinks").append("<input name='annotationDescription' type='text' value='Expliquez les raisons de l'annotaion'><br>");
+						$("#moviesLinks").append("<select name='menu'><option value='0' selected>Raison de l'annotation</option><option value='5'>Décors et costumes</option><option value='6'>Référence ou citation</option><option value='7'>Personnage récurrent</option><option value='8'>Thème ou sujet</option><option value='9'>Mise en scène</option>");
 						if (data.error === true)
 						$('#Form').show(500);
 					},
