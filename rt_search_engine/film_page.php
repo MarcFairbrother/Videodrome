@@ -21,6 +21,11 @@
 	
 	}
 	
+	/*$sql = "SELECT annotation_title FROM user_annotations WHERE source_movie_id='$filmID'";
+	$sqlResult = mysqli_query($connexion, $sql);
+	
+	$annotationTitles = $sqlResult;*/
+	
 	mysqli_close ($connexion);
 
 ?>
@@ -138,7 +143,12 @@ header{
 	</section>
 	<section id="cast">
 		<div id="castDetails">
-			<?php echo $detail ?>
+			<?php
+				echo $detail
+				
+				//echo $annotationTitles."<br>";
+				
+			?>
 		</div>
 		<nav class="scroll_arrow">
 			<img src="../img/arrow_down.png" alt="Scroller" id="toPlayer"/>
@@ -198,6 +208,8 @@ header{
 
 				$('#Form').hide(0);
 				$('#message').hide(0);
+				
+				var sourceMovie = <?php echo json_encode($filmID); ?>;
 
 				$.ajax({
 					type : 'POST',
@@ -207,14 +219,16 @@ header{
 						movieSearch : $('#movieSearch').val()
 					},
 					success : function (data) {
-						$("#movieResults").html("<form id='moviesLinks'></form>");
+						$("#movieResults").html("<form id='moviesLinks' action='annotate.php' method='post'></form>");
+						$("#moviesLinks").append("<input name='sourceMovie' type='hidden' value='" + sourceMovie + "'><br>");
 						$("#moviesLinks").append("<input name='annotationTitle' type='text' value='Choisissez un titre'><br>");
 						$("#moviesLinks").append("<input name='briefDescription' type='text' value='Description brève de l'annotation'><br>");
 						data.msg.forEach(function(film){
 							$("#moviesLinks").append("<input class='movieChoices' type='radio' name='filmChoice' value='" + film.id + "'><a href='film_page.php?film=" + film.id + "'>" + film.id + ": " + film.title + "</a><br>");
 						});
 						$("#moviesLinks").append("<input name='annotationDescription' type='text' value='Expliquez les raisons de l'annotaion'><br>");
-						$("#moviesLinks").append("<select name='menu'><option value='0' selected>Raison de l'annotation</option><option value='5'>Décors et costumes</option><option value='6'>Référence ou citation</option><option value='7'>Personnage récurrent</option><option value='8'>Thème ou sujet</option><option value='9'>Mise en scène</option>");
+						$("#moviesLinks").append("<select name='annotationType'><option value='0' selected>Raison de l'annotation</option><option value='5'>Décors et costumes</option><option value='6'>Référence ou citation</option><option value='7'>Personnage récurrent</option><option value='8'>Thème ou sujet</option><option value='9'>Mise en scène</option>");
+						$("#moviesLinks").append("<input type='submit'>");
 						if (data.error === true)
 						$('#Form').show(500);
 					},
