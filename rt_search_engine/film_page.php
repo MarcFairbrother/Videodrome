@@ -21,10 +21,63 @@
 	
 	}
 	
-	/*$sql = "SELECT annotation_title FROM user_annotations WHERE source_movie_id='$filmID'";
+	//Fetch annotations where current Movie is source
+	
+	$sql = "SELECT annotation_title, target_movie_id, brief_description, annotation_description FROM user_annotation WHERE source_movie_id='$filmID'";
 	$sqlResult = mysqli_query($connexion, $sql);
 	
-	$annotationTitles = $sqlResult;*/
+	$annotationCounter = 0;
+	
+	$arrAnnotation=[
+			"foo" => "bar",
+			"bar" => "foo",
+		];
+	
+	while ($row = mysqli_fetch_row($sqlResult)){
+		
+		$sql = "SELECT film_title, release_year FROM films WHERE film_title_id='$row[1]'";
+		$sqlMovie = mysqli_query($connexion, $sql);
+		
+		while($rowMovie = mysqli_fetch_row($sqlMovie)){
+		
+			$linkedMovie = "<a href='film_page.php?film=".$row[1]."' >".$rowMovie[0]." (".$rowMovie[1].")</a>";
+		
+		}
+	
+		$arrAnnotation[$annotationCounter]= "<strong>Titre de l'annotation:</strong> ".$row[0]."<br><strong>Descriptif:</strong> ".$row[2]."<br><strong>Lié au film:</strong> ".$linkedMovie."<br><strong>Détail:</strong> ".$row[3]."<br><br>";
+	
+		$annotationCounter++;
+	
+	}
+	
+	//Fetch annotations where current Movie is target
+	
+	$sql = "SELECT annotation_title, source_movie_id, brief_description, annotation_description FROM user_annotation WHERE target_movie_id='$filmID'";
+	$sqlResult = mysqli_query($connexion, $sql);
+	
+	$annotationCounterInverted = 0;
+	
+	$arrAnnotationInverted=[
+			"foo" => "bar",
+			"bar" => "foo",
+		];
+	
+	while ($row = mysqli_fetch_row($sqlResult)){
+		
+		$sql = "SELECT film_title, release_year FROM films WHERE film_title_id='$row[1]'";
+		$sqlMovie = mysqli_query($connexion, $sql);
+		
+		while($rowMovie = mysqli_fetch_row($sqlMovie)){
+		
+			$linkedMovieInverted = "<a href='film_page.php?film=".$row[1]."' >".$rowMovie[0]." (".$rowMovie[1].")</a>";
+		
+		}
+	
+		$arrAnnotationInverted[$annotationCounterInverted]= "<strong>Titre de l'annotation:</strong> ".$row[0]."<br><strong>Descriptif:</strong> ".$row[2]."<br><strong>Lié au film:</strong> ".$linkedMovieInverted."<br><strong>Détail:</strong> ".$row[3]."<br><br>";
+	
+		$annotationCounterInverted++;
+	
+	}
 	
 	mysqli_close ($connexion);
 
@@ -144,9 +197,31 @@ header{
 	<section id="cast">
 		<div id="castDetails">
 			<?php
-				echo $detail
+				echo $detail;
 				
-				//echo $annotationTitles."<br>";
+				echo "<br><br>";
+				
+				$i = 0;
+				
+				while($i<$annotationCounter){
+				
+					echo $arrAnnotation[$i]."<br>";
+					
+					$i++;
+					
+				}
+				
+				echo "<br><br>";
+				
+				$i = 0;
+				
+				while($i<$annotationCounterInverted){
+				
+					echo $arrAnnotationInverted[$i]."<br>";
+					
+					$i++;
+					
+				}
 				
 			?>
 		</div>
@@ -226,7 +301,7 @@ header{
 						data.msg.forEach(function(film){
 							$("#moviesLinks").append("<input class='movieChoices' type='radio' name='filmChoice' value='" + film.id + "'><a href='film_page.php?film=" + film.id + "'>" + film.id + ": " + film.title + "</a><br>");
 						});
-						$("#moviesLinks").append("<input name='annotationDescription' type='text' value='Expliquez les raisons de l'annotaion'><br>");
+						$("#moviesLinks").append("<input name='annotationDescription' type='text' value='Expliquez les raisons de l'annotation'><br>");
 						$("#moviesLinks").append("<select name='annotationType'><option value='0' selected>Raison de l'annotation</option><option value='5'>Décors et costumes</option><option value='6'>Référence ou citation</option><option value='7'>Personnage récurrent</option><option value='8'>Thème ou sujet</option><option value='9'>Mise en scène</option>");
 						$("#moviesLinks").append("<input type='submit'>");
 						if (data.error === true)
